@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 WTC_2023_25_players = {
     "top_batsmen" : {
@@ -9,7 +10,7 @@ WTC_2023_25_players = {
     "matches_played" : [22, 19, 22, 17, 20, 20, 20, 19, 11, 11],
     "innings" : [40, 36, 41, 29, 39, 37, 36, 34, 22, 20],
     "runs" : [1968, 1798, 1470, 1463, 1428, 1403, 1197, 1175, 1152, 1123],
-    "highest_score" :["262", "214*", "153", "317", "232", "141", "152", "189", "156", "182*"],
+    "highest_score" :[262, 214, 153, 317, 232, 141, 152, 189, 156, 182],
     "avg" : [54.66, 52.88, 36.75, 50.44, 39.66, 41.26, 34.2, 34.55, 54.85, 62.38],
     "ball_faced" : [3006, 2738, 1743, 1755, 3211, 2686, 1483, 1509, 2128, 1702],
     "SR" : [65.46, 65.66, 84.33, 83.36, 44.47, 52.23, 80.71, 77.86, 54.13, 65.98],
@@ -47,119 +48,48 @@ df_top_10_bowlers.to_csv('top_10_bowlers.csv')
 print(df_top_10_bowlers)
 
 
-def top_3_players(df,name_col,innings_col,runs_col, avg_col,highest_score, hundreds_col, half_century_col, sort_by,  higher_is_better=True):
+def top_players_with_graph(
+    df,
+    name_col,
+    innings_col,
+    stat_col,
+    title,
+    ylabel,
+    top_n=3,
+    higher_is_better=True
+):
+    """
+    df               : DataFrame
+    name_col         : Player name column
+    innings_col      : Innings column
+    stat_col         : Stat column (runs, avg, wickets, etc.)
+    title            : Graph title
+    ylabel           : Y-axis label
+    top_n            : Number of top players to display
+    higher_is_better : True for max stats, False for min stats
+    """
 
-    return df.sort_values(
-        by=sort_by,
+    # 🔹 Sort data
+    sorted_df = df.sort_values(
+        by=stat_col,
         ascending=not higher_is_better
-    )[[name_col,innings_col,runs_col, avg_col, highest_score, hundreds_col, half_century_col]].head(3)
+    )
 
-top_run_scorer = top_3_players(
-    df_top_batsmen,
-    "player_name",
-    "innings",
-    "runs",
-    "avg",
-    "highest_score",
-    "Century",
-    "half_century",
-    sort_by="runs",
-    higher_is_better=True
-)
+    # 🔹 Top N table
+    top_players = sorted_df[[name_col, innings_col, stat_col]].head(top_n)
 
-top_avg_batsmen = top_3_players(
-    df_top_batsmen,
-    "player_name",
-    "innings",
-    "runs",
-    "avg",
-    "highest_score",
-    "Century",
-    "half_century",
-    sort_by="avg",
-    higher_is_better=True
-)
+    # 🔹 Plot graph
+    plt.figure()
+    plt.bar(top_players[name_col], top_players[stat_col])
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.show()
 
-highest_individual_score = top_3_players(
-    df_top_batsmen,
-    "player_name",
-    "innings",
-    "runs",
-    "avg",
-    "highest_score",
-    "Century",
-    "half_century",
-    sort_by="highest_score",
-    higher_is_better=True
-)
-
-Most_Century = top_3_players(
-    df_top_batsmen,
-    "player_name",
-    "innings",
-    "runs",
-    "avg",
-    "highest_score",
-    "Century",
-    "half_century",
-    sort_by="Century",
-    higher_is_better=True
-)
-
-Most_Half_Century = top_3_players(
-    df_top_batsmen,
-    "player_name",
-    "innings",
-    "runs",
-    "avg",
-    "highest_score",
-    "Century",
-    "half_century",
-    sort_by="half_century",
-    higher_is_better=True
-
-)
+    print(top_players)
 
 
-def top_3_players(df,name_col,innings_col,wickets_taken_col, avg_col, five_wkt_haul, sort_by,  higher_is_better=False):
-
-    return df.sort_values(
-        by=sort_by,
-        ascending=not higher_is_better
-    )[[name_col,innings_col,wickets_taken_col, avg_col,five_wkt_haul]].head(3)
-
-Most_Wickets = top_3_players(
-    df_top_10_bowlers,
-    "player_name",
-    "innings",
-    "wickets_taken",
-    "avg",
-    "5_wkt_haul",
-    sort_by="wickets_taken",
-    higher_is_better=True
-)
-
-Best_Average = top_3_players(
-    df_top_10_bowlers,
-    "player_name",
-    "innings",
-    "wickets_taken",
-    "avg",
-    "5_wkt_haul",
-    sort_by="avg",
-    higher_is_better=False
-)
-
-Most_Fifers = top_3_players(
-    df_top_10_bowlers,
-    "player_name",
-    "innings",
-    "wickets_taken",
-    "avg",
-    "5_wkt_haul",
-    sort_by="5_wkt_haul",
-    higher_is_better=True
-)
 
 while True:
     print("\n--- World Test Championship 2023-25 Records ---")
@@ -171,26 +101,100 @@ while True:
     print("6. Most Wickets in WTC 23-25")
     print("7. Best Average in WTC 23-25")
     print("8. Most 5_wkt_haul")
+    print("9. Exit")
 
 
 
     choice = int(input("Enter choice: "))
 
     if choice == 1:
-        print(top_run_scorer)
+        top_players_with_graph(
+                df_top_batsmen,
+                "player_name",
+                "innings",
+                "runs",
+                "Top Run Scorers – WTC 2023-25",
+                "Runs",
+                top_n=5,
+                higher_is_better=True
+            )
     elif choice == 2:
-        print(top_avg_batsmen)
+        top_players_with_graph(
+                  df_top_batsmen,
+                  "player_name",
+                  "innings",
+                  "avg",
+                  "Best Batting Average – WTC 2023-25",
+                  "Average",
+                 top_n=3,
+                higher_is_better=True
+            )
     elif choice == 3:
-        print(highest_individual_score)
+        top_players_with_graph(
+            df_top_batsmen,
+            "player_name",
+            "innings",
+            "highest_score",
+            "Highest Individual in WTC 2023-25",
+            "Highest Score" 
+          )
     elif choice == 4:
-        print(Most_Century)
+        top_players_with_graph(
+            df_top_batsmen,
+            "player_name",
+            "innings",
+            "Century",
+            "Most Century in – WTC 2023-25",
+            "CENTURY",
+            top_n=3,
+            higher_is_better=True
+        )
     elif choice == 5:
-        print(Most_Half_Century)
+        top_players_with_graph(
+            df_top_batsmen,
+            "player_name",
+            "innings",
+            "half_century",
+            "Most Half Century in – WTC 2023-25",
+            "Half Centuries",
+            top_n=3,
+            higher_is_better=True
+        )
     elif choice == 6:
-        print(Most_Wickets)
+        top_players_with_graph(
+            df_top_10_bowlers,
+            "player_name",
+            "innings",
+            "wickets_taken",
+            "Most Wickets – WTC 2023-25",
+            "Wickets",
+            top_n=5,
+            higher_is_better=True
+)
     elif choice == 7:
-        print(Best_Average)
+         top_players_with_graph(
+            df_top_10_bowlers,
+            "player_name",
+            "innings",
+            "avg",
+            "Best Bowling Average – WTC 2023-25",
+            "Average",
+            top_n=3,
+            higher_is_better=False
+)
     elif choice == 8:
-        print(Most_Fifers)
+        top_players_with_graph(
+            df_top_10_bowlers,
+            "player_name",
+            "innings",
+            "5_wkt_haul",
+            "Most 5 Wicket Haul in – WTC 2023-25",
+            "5_Wkt_Haul",
+            top_n=3,
+            higher_is_better=True
+)
+    elif choice == 9:
+        print("Thank-You")
+        break
     else:
         print("❌ Invalid choice")
